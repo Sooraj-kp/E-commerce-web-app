@@ -1,182 +1,191 @@
-    <?php
-    use App\Http\Controllers\ProfileController;
-    use App\Http\Controllers\AddressController;
-    use Illuminate\Support\Facades\Route;
-    use App\Http\Controllers\AdminController;
-    use App\Http\Controllers\ProductController;
-    use App\Http\Controllers\OrderController;
-    use App\Http\Controllers\CustomerController;
-    use App\Http\Controllers\StaffController;
-    use App\Http\Controllers\TaskController;
-    use App\Http\Controllers\CategoryController;
-    use App\Http\Controllers\StaffDashboardController;
-    use App\Http\Controllers\StaffTaskController;
-    use App\Http\Controllers\CartController;
-    use App\Http\Controllers\CheckoutController;
-    use App\Http\Controllers\CustomerAccountController;
-    use App\Http\Controllers\AdminOrderController;
-    use App\Http\Controllers\StaffOrderController;
+        <?php
+        use App\Http\Controllers\ProfileController;
+        use App\Http\Controllers\AddressController;
+        use Illuminate\Support\Facades\Route;
+        use App\Http\Controllers\AdminController;
+        use App\Http\Controllers\ProductController;
+        use App\Http\Controllers\OrderController;
+        use App\Http\Controllers\CustomerController;
+        use App\Http\Controllers\StaffController;
+        use App\Http\Controllers\TaskController;
+        use App\Http\Controllers\CategoryController;
+        use App\Http\Controllers\StaffDashboardController;
+        use App\Http\Controllers\StaffTaskController;
+        use App\Http\Controllers\CartController;
+        use App\Http\Controllers\CheckoutController;
+        use App\Http\Controllers\CustomerAccountController;
+        use App\Http\Controllers\AdminOrderController;
+        use App\Http\Controllers\StaffOrderController;
+        use App\Http\Controllers\RazorpayWebhookController;
 
-    Route::get('/', function () {
-        return redirect('/login');
-    });
+        Route::get('/', function () {
+            return redirect('/login');
+        });
 
-    Route::get('/shop', [ProductController::class, 'shop'])->name('shop');
+        Route::get('/shop', [ProductController::class, 'shop'])->name('shop');
 
-    Route::get('/shop/{product}', [ProductController::class, 'show'])->name('shop.show');
+        Route::get('/shop/{product}', [ProductController::class, 'show'])->name('shop.show');
 
-    Route::get('/dashboard', function () {
-        $user=auth()->user();
-        if($user->role=='admin'){
-            return redirect('/admin');
-        }
-        if($user->role=='staff'){
-            return redirect('/Staff/dashboard');
-        }
-    })->middleware(['auth','staff'])->name('dashboard');
+        Route::get('/dashboard', function () {
+            $user=auth()->user();
+            if($user->role=='admin'){
+                return redirect('/admin');
+            }
+            if($user->role=='staff'){
+                return redirect('/Staff/dashboard');
+            }
+        })->middleware(['auth','staff'])->name('dashboard');
 
-    Route::get('/Staff/dashboard',[StaffDashboardController::class,'index'])->middleware('auth','staff')->name('Staff.dashboard');
+        Route::get('/Staff/dashboard',[StaffDashboardController::class,'index'])->middleware('auth','staff')->name('Staff.dashboard');
 
-    Route::middleware('auth')->group(function () {
-        Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-        Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');     
-        Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    });
+        Route::middleware('auth')->group(function () {
+            Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+            Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');     
+            Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+        });
 
-    Route::get('/my-account', [CustomerAccountController::class, 'index'])
-    ->middleware('auth')
-    ->name('customer.account');
+        Route::get('/my-account', [CustomerAccountController::class, 'index'])
+        ->middleware('auth')
+        ->name('customer.account');
 
-    Route::get('/admin',[AdminController::class,'dashboard'])
-    ->middleware('admin') ;
+        Route::get('/admin',[AdminController::class,'dashboard'])
+        ->middleware('admin') ;
 
 
-    Route::get('/products', [ProductController::class, 'index'])
+        Route::get('/products', [ProductController::class, 'index'])
+            ->middleware('admin');
+
+        Route::get('/products/create', [ProductController::class, 'create'])
+            ->middleware('admin');
+
+        Route::post('/products', [ProductController::class, 'store'])
+            ->middleware('admin');
+
+        Route::get('/products/{product}/edit', [ProductController::class, 'edit'])
         ->middleware('admin');
 
-    Route::get('/products/create', [ProductController::class, 'create'])
+        Route::put('/products/{product}', [ProductController::class, 'update'])
         ->middleware('admin');
 
-    Route::post('/products', [ProductController::class, 'store'])
+        Route::delete('/products/{product}', [ProductController::class, 'destroy'])
         ->middleware('admin');
 
-    Route::get('/products/{product}/edit', [ProductController::class, 'edit'])
-    ->middleware('admin');
-
-    Route::put('/products/{product}', [ProductController::class, 'update'])
-    ->middleware('admin');
-
-    Route::delete('/products/{product}', [ProductController::class, 'destroy'])
-    ->middleware('admin');
-
-    Route::get('/orders',[OrderController::class,'index'])
-    ->middleware('admin');
-
-    Route::get('/customers',[CustomerController::class,'index'])
-    ->middleware('admin');
-
-    Route::get('staff',[StaffController::class,'index'])
-    ->middleware('admin');
-
-    Route::get('/staff/create', [StaffController::class, 'create'])
+        Route::get('/orders',[OrderController::class,'index'])
         ->middleware('admin');
 
-    Route::post('/staff', [StaffController::class, 'store'])
-    ->middleware('admin');
+        Route::get('/customers',[CustomerController::class,'index'])
+        ->middleware('admin');
 
-    Route::get('/staff/{id}/edit',[StaffController::class,'edit'])->middleware('admin');
+        Route::get('staff',[StaffController::class,'index'])
+        ->middleware('admin');
 
-    Route::put('/staff/{id}',[StaffController::class,'update'])->middleware('admin');
+        Route::get('/staff/create', [StaffController::class, 'create'])
+            ->middleware('admin');
 
+        Route::post('/staff', [StaffController::class, 'store'])
+        ->middleware('admin');
 
-    Route::get('/admin/tasks',[TaskController::class,'index'])->middleware('admin');
+        Route::get('/staff/{id}/edit',[StaffController::class,'edit'])->middleware('admin');
 
-    Route::get('/admin/tasks/create',[TaskController::class,'create'])->middleware('admin');
-
-    Route::post('/admin/tasks',[TaskController::class,'store'])->middleware('admin');
-
-    Route::get('/admin/tasks/{id}',[TaskController::class,'show'])->middleware('admin');
-
-    Route::get('/admin/tasks/{id}/edit',[TaskController::class,'edit'])->middleware('admin');
-
-    Route::put('/admin/tasks/{id}',[TaskController::class,'update'])->middleware('admin');
-
-    Route::delete('/admin/tasks/{id}',[TaskController::class,'destroy'])->middleware('admin')->name('admin.tasks.destroy');
+        Route::put('/staff/{id}',[StaffController::class,'update'])->middleware('admin');
 
 
-    Route::post('/admin/tasks/{id}/approve', [TaskController::class, 'approve'])
-    ->middleware('admin');
+        Route::get('/admin/tasks',[TaskController::class,'index'])->middleware('admin');
 
-    Route::post('/admin/tasks/{id}/request-revision',
-    [TaskController::class, 'requestRevision'])
-    ->middleware('admin')
-    ->name('admin.tasks.requestRevision');
+        Route::get('/admin/tasks/create',[TaskController::class,'create'])->middleware('admin');
 
-    Route::get('/admin/categories',[CategoryController::class,'index'])->middleware('admin');
+        Route::post('/admin/tasks',[TaskController::class,'store'])->middleware('admin');
 
-    Route::get('/admin/categories/create',[CategoryController::class,'create'])->middleware('admin');
+        Route::get('/admin/tasks/{id}',[TaskController::class,'show'])->middleware('admin');
 
-    Route::post('/admin/categories',[CategoryController::class,'store'])->middleware('admin');
+        Route::get('/admin/tasks/{id}/edit',[TaskController::class,'edit'])->middleware('admin');
 
-    Route::get('/admin/categories/{category}/edit', [CategoryController::class, 'edit'])
-    ->middleware('admin');
+        Route::put('/admin/tasks/{id}',[TaskController::class,'update'])->middleware('admin');
 
-    Route::put('/admin/categories/{category}', [CategoryController::class, 'update'])
-    ->middleware('admin');
+        Route::delete('/admin/tasks/{id}',[TaskController::class,'destroy'])->middleware('admin')->name('admin.tasks.destroy');
 
-    Route::delete('/admin/categories/{category}', [CategoryController::class, 'destroy'])
-    ->middleware('admin');
 
-    Route::get('/my-addresses/create',[AddressController::class,'create'])->name('customer.address.create');
+        Route::post('/admin/tasks/{id}/approve', [TaskController::class, 'approve'])
+        ->middleware('admin');
 
-    Route::post('/my-addresses/',[AddressController::class,'store'])->name('customer.address.store');
+        Route::post('/admin/tasks/{id}/request-revision',
+        [TaskController::class, 'requestRevision'])
+        ->middleware('admin')
+        ->name('admin.tasks.requestRevision');
 
-    Route::get('/Staff/task',[StaffTaskController::class,'index'])->middleware('auth','staff')->name('staff.task.index');
+        Route::get('/admin/categories',[CategoryController::class,'index'])->middleware('admin');
 
-    Route::get('/Staff/task/{id}',[StaffTaskController::Class,'show'])->middleware('auth','staff')->name('staff.task.show');
+        Route::get('/admin/categories/create',[CategoryController::class,'create'])->middleware('admin');
 
-    Route::post('/Staff/task/{id}/start',[StaffTaskController::Class,'start'])->middleware('auth','staff')->name('staff.task.start');
+        Route::post('/admin/categories',[CategoryController::class,'store'])->middleware('admin');
 
-    Route::post('Staff/task/{id}/submit',[StaffTaskController::Class,'submit'])->middleware('auth','staff')->name('staff.task.submit');
+        Route::get('/admin/categories/{category}/edit', [CategoryController::class, 'edit'])
+        ->middleware('admin');
 
-    Route::post('cart/add/{product}',[CartController::class,'add'])->middleware('auth')->name('cart.add');
+        Route::put('/admin/categories/{category}', [CategoryController::class, 'update'])
+        ->middleware('admin');
 
-    Route::get('/cart',[CartController::class,'index'])->middleware('auth')->name('cart.index');
+        Route::delete('/admin/categories/{category}', [CategoryController::class, 'destroy'])
+        ->middleware('admin');
 
-    Route::patch('/cart/update/{cartItem}',[CartController::class,'update'])->middleware('auth')->name('cart.update');
+        Route::get('/my-addresses/create',[AddressController::class,'create'])->name('customer.address.create');
 
-    Route::delete('/cart/remove/{cartItem}',[CartController::class,'remove'])->middleware('auth')->name('cart.remove');
+        Route::post('/my-addresses/',[AddressController::class,'store'])->name('customer.address.store');
 
-    Route::get('/checkout',[CheckoutController::class,'index'])->middleware('auth')->name('checkout.index');
+        Route::get('/Staff/task',[StaffTaskController::class,'index'])->middleware('auth','staff')->name('staff.task.index');
 
-    Route::post('/checkout/place-order',[CheckoutController::class,'store'])->middleware('auth')->name('checkout.store');
+        Route::get('/Staff/task/{id}',[StaffTaskController::Class,'show'])->middleware('auth','staff')->name('staff.task.show');
 
-    Route::get('/my-orders/{order}',[OrderController::class,'show'])->middleware('auth')->name('customer.orders.show');
+        Route::post('/Staff/task/{id}/start',[StaffTaskController::Class,'start'])->middleware('auth','staff')->name('staff.task.start');
 
-    Route::delete('/my-addresses/{address}',[AddressController::class,'destroy'])->middleware('auth')->name('customer.address.destroy');
+        Route::post('Staff/task/{id}/submit',[StaffTaskController::Class,'submit'])->middleware('auth','staff')->name('staff.task.submit');
 
-    Route::get('/my-addresses/{id}/edit',[AddressController::class,'edit'])->middleware('auth')->name('customer.address.edit');
+        Route::post('cart/add/{product}',[CartController::class,'add'])->middleware('auth')->name('cart.add');
 
-    Route::put('/my-addresses/{id}',[AddressController::class,'update'])->middleware('auth')->name('customer.address.update');
+        Route::get('/cart',[CartController::class,'index'])->middleware('auth')->name('cart.index');
 
-    Route::get('/my-orders',[OrderController::class,'myOrders'])->middleware('auth')->name('customer.orders.index');
+        Route::patch('/cart/update/{cartItem}',[CartController::class,'update'])->middleware('auth')->name('cart.update');
 
-    Route::get('admin/orders{id}',[AdminOrderController::class,'show'])->middleware('admin')->name('admin.orders.show');
+        Route::delete('/cart/remove/{cartItem}',[CartController::class,'remove'])->middleware('auth')->name('cart.remove');
 
-    Route::get('/admin/orders',[AdminOrderController::class,'index'])->middleware('admin')->name('admin.orders.index');
+        Route::get('/checkout',[CheckoutController::class,'index'])->middleware('auth')->name('checkout.index');
 
-    Route::put('/admin/orders/{id}/assign-staff',[AdminOrderController::class,'assignStaff'])->middleware('admin')->name('admin.orders.assignStaff');
+        Route::post('/checkout/place-order',[CheckoutController::class,'store'])->middleware('auth')->name('checkout.store');
 
-    Route::put('/admin/orders/{id}/status',[AdminOrderController::class,'updateStatus'])->middleware('admin')->name('admin.orders.updateStatus');
+        Route::get('/my-orders/{order}',[OrderController::class,'show'])->middleware('auth')->name('customer.orders.show');
 
-    Route::get('/staff/orders',[StaffOrderController::class,'index'])->middleware('auth','staff')->name('staff.orders.index');
+        Route::delete('/my-addresses/{address}',[AddressController::class,'destroy'])->middleware('auth')->name('customer.address.destroy');
 
-    Route::get('/staff/orders/{id}',[StaffOrderController::class,'show'])->middleware('auth','staff')->name('staff.orders.show');
+        Route::get('/my-addresses/{id}/edit',[AddressController::class,'edit'])->middleware('auth')->name('customer.address.edit');
 
-    Route::put('staff/orders/{id}/status',[StaffOrderController::class,'updateStatus'])->middleware('auth','staff')->name('staff.orders.updateStatus');
+        Route::put('/my-addresses/{id}',[AddressController::class,'update'])->middleware('auth')->name('customer.address.update');
 
-    Route::post('buy-now/{product}',[CheckoutController::class,'buyNow'])->middleware('auth')->name('checkout.buyNow');
+        Route::get('/my-orders',[OrderController::class,'myOrders'])->middleware('auth')->name('customer.orders.index');
 
-    Route::patch('/orders/{order}/cancel',[OrderController::class,'cancel'])->middleware('auth')->name('customer.orders.cancel');
+        Route::get('admin/orders{id}',[AdminOrderController::class,'show'])->middleware('admin')->name('admin.orders.show');
 
-    require __DIR__.'/auth.php';
+        Route::get('/admin/orders',[AdminOrderController::class,'index'])->middleware('admin')->name('admin.orders.index');
+
+        Route::put('/admin/orders/{id}/assign-staff',[AdminOrderController::class,'assignStaff'])->middleware('admin')->name('admin.orders.assignStaff');
+
+        Route::put('/admin/orders/{id}/status',[AdminOrderController::class,'updateStatus'])->middleware('admin')->name('admin.orders.updateStatus');
+
+        Route::get('/staff/orders',[StaffOrderController::class,'index'])->middleware('auth','staff')->name('staff.orders.index');
+
+        Route::get('/staff/orders/{id}',[StaffOrderController::class,'show'])->middleware('auth','staff')->name('staff.orders.show');
+
+        Route::put('staff/orders/{id}/status',[StaffOrderController::class,'updateStatus'])->middleware('auth','staff')->name('staff.orders.updateStatus');
+
+        Route::post('buy-now/{product}',[CheckoutController::class,'buyNow'])->middleware('auth')->name('checkout.buyNow');
+
+        Route::patch('/orders/{order}/cancel',[OrderController::class,'cancel'])->middleware('auth')->name('customer.orders.cancel');
+
+        Route::get('/payment/{order}',[CheckOutController::class,'payment'])->middleware('auth')->name('customer.payment');
+
+        Route::post('/payment/{order}/verify',[CheckOutController::class,'verifyPayment'])->middleware('auth')->name('customer.payment.verify');
+
+        Route::post('payment/{order}/retry',[CheckOutController::class,'retryPayment'])->middleware('auth')->name('customer.payment.retry');
+
+        Route::post('/razorpay/webhook',[RazorpayWebhookController::class,'handle'])->name('razorpay.webhook');
+
+        require __DIR__.'/auth.php';

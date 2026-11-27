@@ -165,6 +165,38 @@
 }
 
 /* Order Card */
+.payment-badge {
+    display: inline-block;
+    padding: 7px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.payment-paid {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.payment-pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.payment-failed {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.payment-cod {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.payment-unknown {
+    background: #f1f5f9;
+    color: #475569;
+}
 
 .orders-list {
     display: grid;
@@ -245,7 +277,7 @@
 
 .order-info {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 20px;
     padding: 22px 0;
 }

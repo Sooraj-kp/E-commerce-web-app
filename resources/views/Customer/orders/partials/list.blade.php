@@ -85,6 +85,39 @@
     @endif
 
 </div>
+                    @php
+                        $payment = $order->latestPayment;
+                        $methodCode = $payment?->paymentMethod?->code;
+
+                        if ($methodCode === 'cod') {
+                            $paymentLabel = $payment->status === 'paid'
+                                ? 'Paid (COD)'
+                                : 'Cash on Delivery';
+
+                            $paymentClass = $payment->status === 'paid'
+                                ? 'payment-paid'
+                                : 'payment-cod';
+
+                        } elseif ($payment?->status === 'paid') {
+                            $paymentLabel = 'Paid';
+                            $paymentClass = 'payment-paid';
+
+                        } elseif (
+                            $payment?->status === 'failed' ||
+                            filled($payment?->failure_reason)
+                        ) {
+                            $paymentLabel = 'Payment Failed';
+                            $paymentClass = 'payment-failed';
+
+                        } elseif ($payment?->status === 'pending') {
+                            $paymentLabel = 'Payment Pending';
+                            $paymentClass = 'payment-pending';
+
+                        } else {
+                            $paymentLabel = 'Not Available';
+                            $paymentClass = 'payment-unknown';
+                        }
+                    @endphp
 
                     <div class="order-info">
 
@@ -101,6 +134,15 @@
                         <div class="info-item">
                             <span>Order Items</span>
                             <strong>{{ $order->items->count() }} Products</strong>
+                        </div>
+                        <div class="info-item">
+                            <span>Payment Status</span>
+
+                            <strong>
+                                <span class="payment-badge {{ $paymentClass }}">
+                                    {{ $paymentLabel }}
+                                </span>
+                            </strong>
                         </div>
 
                     </div>

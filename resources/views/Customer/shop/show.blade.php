@@ -114,7 +114,7 @@
                         </div>
 
                         <p id="cartMessage"></p>
-                    </form>
+                    </form> 
 
                     <form
                         action="{{ route('checkout.buyNow', $product->id) }}"
@@ -477,6 +477,15 @@
                     success: function(response){
                         console.log("Success", response);
                         $("#cartMessage").text(response.message).css("color", "green");
+
+                        let cartBadge = $('#navbar-cart-count');
+                        cartBadge.text(response.cart_count);
+                        if(response.cart_count >0 ){
+                            cartBadge.removeClass('is-hidden');
+
+                        } else {
+                            cartBadge.addClass('is-hidden');
+                        }
                     },
                     error: function(xhr){
                         console.log("Error", xhr.responseJSON);

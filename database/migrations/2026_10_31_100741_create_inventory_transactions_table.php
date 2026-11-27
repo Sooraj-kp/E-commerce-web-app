@@ -14,8 +14,11 @@ return new class extends Migration
         Schema::create('inventory_transactions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('product_id')->constrained()->restrictOnDelete();
-            $table->foreignId('user_id')->constrained()->nullOnDelete();
-
+            $table->foreignId('user_id')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+    
             $table->string('type');
             $table->unsignedInteger('quantity');
             $table->string('reason')->nullable();

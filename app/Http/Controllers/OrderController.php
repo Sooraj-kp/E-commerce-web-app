@@ -57,7 +57,9 @@ class OrderController extends Controller
                 'items.product.images' => function ($query) {
                     $query->orderByDesc('is_primary')
                         ->orderBy('image_order');
-                }
+                },
+                'latestPayment',
+                'latestPayment.paymentMethod',
             ]);
             if($status === 'cancelled'){
                 $ordersQuery->where('status','cancelled');
@@ -74,7 +76,7 @@ class OrderController extends Controller
             return view('customer.orders.index', compact('orders','activeCount','cancelCount','status'));
         }
         public function cancel(Request $request, Order $order)
-    {
+        {
         $user = auth()->user();
 
         if (!$user || $user->role !== 'customer') {

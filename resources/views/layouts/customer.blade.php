@@ -13,6 +13,43 @@
         * {
             box-sizing: border-box;
         }
+        .customer-cart-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+        }
+
+        .customer-cart-icon-wrap {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+        .customer-cart-badge.is-hidden {
+            display: none;
+        }
+
+        .customer-cart-icon-wrap svg {
+            width: 23px;
+            height: 23px;
+        }
+
+        .customer-cart-badge {
+            position: absolute;
+            top: -9px;
+            right: -10px;
+            min-width: 19px;
+            height: 19px;
+            padding: 0 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            font-size: 11px;
+            font-weight: 700;
+            line-height: 1;
+        }
 
         body {
             margin: 0;
@@ -138,12 +175,41 @@
         
 
             @auth
+
+                @php
+
+                    $navbarCart = auth()->user()->carts()->with('items')->first();
+                    $navbarCartCount = $navbarCart ? $navbarCart->items->sum('quantity'):0;
+
+                @endphp
                 
 
                 <a href="{{ route('customer.account') }}">My Account</a>
                 <a href="{{ route('shop') }}">Shop</a>
 
-                <a href="{{route('cart.index')}}">My Cart</a>
+                <a href="{{route('cart.index')}}" class="customer-cart-link">
+
+                    <span class="customer-cart-icon-wrap">
+                        <svg viewBox = "0 0 24 24" fill="none" 
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-line-join="round">
+
+                            <circle cx="9" cy="21" r="1"/>
+                            <circle cx="20" cy="21" r="1"/>
+                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                        </svg> 
+
+                        <span
+                            class="customer-cart-badge {{ $navbarCartCount > 0 ? '' : 'is-hidden' }}"
+                            id="navbar-cart-count"
+                        >
+                            {{ $navbarCartCount }}
+                        </span>
+                        
+                        <span>My Cart</span>
+                    </a>
 
                 <a href="{{ route('customer.orders.index') }}">My Orders</a>
 

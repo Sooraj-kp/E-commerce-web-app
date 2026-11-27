@@ -182,6 +182,7 @@
 
                     @endforeach
 
+
                     <div class="order-total">
                         <span>Total</span>
                         <strong>₹{{ number_format($grandTotal, 2) }}</strong>
@@ -193,6 +194,17 @@
 
             {{-- Place Order --}}
             <div class="checkout-footer">
+
+                <div class="mb-3">
+                    <label>Select Payment Method</label>
+
+                    <select name="payment_method" required>
+                        <option value="">Choose Payment Method</option>
+                        <option value="cod">Cash on Delivery</option>
+                        <option value="razorpay">Online Payment</option>
+                    </select>
+                </div>
+
 
                 <div>
                     <h3>Ready to place your order?</h3>

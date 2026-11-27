@@ -199,56 +199,88 @@
         @endif
     </section>
 
-    {{-- Actions --}}
-    <div class="os-actions">
-        <a href="{{ url('/shop') }}" class="os-btn">Continue shopping</a>
-        <a href="{{ route('customer.account') }}" class="os-btn os-btn-ghost">My account</a>
+    
+{{-- Actions --}}
+<div class="os-actions">
 
-            @if($order->canBeCancelled())
+    <a href="{{ url('/shop') }}" class="os-btn">
+        Continue shopping
+    </a>
 
-                <div class="os-cancel-section">
+    <a href="{{ route('customer.account') }}" class="os-btn os-btn-ghost">
+        My account
+    </a>
 
-                    <button type="button"
-                            class="os-btn os-btn-cancel"
-                            onclick="toggleCancelForm({{ $order->id }})">
-                        Cancel Order
+    {{-- Retry Payment --}}
+    @php
+        $latestPayment = $order->latestPayment;
+
+        $canRetryPayment = $latestPayment
+            && $latestPayment->paymentMethod?->code === 'razorpay'
+            && $latestPayment->status !== 'paid'
+            && !in_array($order->status, ['cancelled', 'delivered'], true);
+    @endphp
+
+    @if($canRetryPayment)
+        <form action="{{ route('customer.payment.retry', $order->id) }}"
+              method="POST"
+              class="os-retry-form">
+
+            @csrf
+
+            <button type="submit" class="os-btn os-btn-retry">
+                Retry Payment
+            </button>
+        </form>
+    @endif
+
+    {{-- Cancel Order --}}
+    @if($order->canBeCancelled())
+
+        <div class="os-cancel-section">
+
+            <button type="button"
+                    class="os-btn os-btn-cancel"
+                    onclick="toggleCancelForm({{ $order->id }})">
+                Cancel Order
+            </button>
+
+            <form id="cancel-form-{{ $order->id }}"
+                  class="os-cancel-form"
+                  action="{{ route('customer.orders.cancel', $order->id) }}"
+                  method="POST"
+                  style="display: none;">
+
+                @csrf
+                @method('PATCH')
+
+                <textarea
+                    name="cancellation_reason"
+                    placeholder="Please tell us why you want to cancel this order..."
+                    maxlength="1000"
+                    rows="3"></textarea>
+
+                <div class="os-cancel-actions">
+
+                    <button type="submit" class="os-confirm-cancel">
+                        Confirm Cancellation
                     </button>
 
-                    <form id="cancel-form-{{ $order->id }}"
-                        class="os-cancel-form"
-                        action="{{ route('customer.orders.cancel', $order->id) }}"
-                        method="POST"
-                        style="display: none;">
-
-                        @csrf
-                        @method('PATCH')
-
-                        <textarea
-                            name="cancellation_reason"
-                            placeholder="Please tell us why you want to cancel this order..."
-                            maxlength="1000"
-                            rows="3"></textarea>
-
-                        <div class="os-cancel-actions">
-
-                            <button type="submit" class="os-confirm-cancel">
-                                Confirm Cancellation
-                            </button>
-
-                            <button type="button"
-                                    class="os-keep-order"
-                                    onclick="toggleCancelForm({{ $order->id }})">
-                                Keep Order
-                            </button>
-
-                        </div>
-
-                    </form>
+                    <button type="button"
+                            class="os-keep-order"
+                            onclick="toggleCancelForm({{ $order->id }})">
+                        Keep Order
+                    </button>
 
                 </div>
+            </form>
 
-            @endif
-    </div>
+        </div>
+
+    @endif
+
+</div>
+
 
 </div>
 
@@ -321,6 +353,14 @@
 
 .os-keep-order:hover {
     background: var(--brand-soft);
+}
+.os-retry-form{
+    margin:0;
+}
+.os-btn-retry{
+    border:none;
+    cursor:pointer;
+    font-family:inherit;
 }
 
 @media (max-width: 600px) {

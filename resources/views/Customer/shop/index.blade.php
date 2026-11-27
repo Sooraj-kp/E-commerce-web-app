@@ -444,7 +444,12 @@
                         type:'GET',
 
                         beforeSend: function(){
-                            $('#product-container').html('<p>Page Loading</p>');
+                            $('#product-container').html(`
+                            <div class="loading-container">
+                            <div class="loader"></div>
+                            <p>Loading Products...</p>
+                            </div>
+                            `);
 
                         },
                         success: function(response){

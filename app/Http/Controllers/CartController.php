@@ -75,9 +75,13 @@ class CartController extends Controller
         }
         if($request->expectsJson()){
 
+            $cartCount =  $cart->items()->sum('quantity');
+
+
             return response()->json([
                 'status'=>'success',
-                'message'=>'Product added successfully'
+                'message'=>'Product added successfully',
+                'cart_count' => $cartCount
 
             ]);
 
